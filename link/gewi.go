@@ -1,5 +1,10 @@
 package link
 
+import (
+	"fmt"
+	"reflect"
+)
+
 //Struct describing GEWI link
 type gewi struct {
 	//How much entanglement is gained per empty slot
@@ -178,4 +183,29 @@ func (link *gewi) ProcessGeneratedTraffic(traffic []int) {
 	for i := 0; i < len(traffic); i++ {
 		link.ProcessSingleStep(traffic[i])
 	}
+}
+
+// For the csv logs Returns the list of the values
+func (obj *gewi) GetValues() ([]string, []string) {
+	fmt.Println("Getting values")
+
+	e := reflect.ValueOf(&obj).Elem().Elem()
+
+	nameList := make([]string, 0)
+	valueList := make([]string, 0)
+
+	for i := 0; i < e.NumField(); i++ {
+		varName := e.Type().Field(i).Name
+		varType := e.Type().Field(i).Type
+		varValue := e.Field(i).Interface()
+
+		if varType.Kind() != reflect.Int && varType.Kind() != reflect.Float64 {
+			continue
+		}
+
+		nameList = append(nameList, fmt.Sprintf("GEWI-%v", varName))
+		valueList = append(valueList, fmt.Sprintf("%v", varValue))
+	}
+
+	return nameList, valueList
 }

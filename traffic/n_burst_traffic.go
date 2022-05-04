@@ -3,8 +3,12 @@ package traffic
 import (
 	crypto_rand "crypto/rand"
 	"encoding/binary"
+	"fmt"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
+	"math"
+	math_rand "math/rand"
+	"reflect"
 )
 
 type NBurstSource struct {
@@ -14,16 +18,16 @@ type NBurstSource struct {
 
 	// Pareto Distribution for on/off trains specific to this model
 	T     int
-	alpha float64
-	theta float64
-	gamma float64
+	Alpha float64
+	Theta float64
+	Gamma float64
 
 	// Randomness objects
 	on  TPT
 	off distuv.Poisson
 }
 
-func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) {
+func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurstSource {
 	on := NewTruncatedPowerTailDistribution(T, alpha, theta, gamma)
 
 	var b1 [8]byte
@@ -48,9 +52,9 @@ func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) {
 		periodLengths: periodLengths,
 		periodTypes:   periodTypes,
 		T:             T,
-		alpha:         alpha,
-		theta:         theta,
-		gamma:         gamma,
+		Alpha:         alpha,
+		Theta:         theta,
+		Gamma:         gamma,
 		on:            on,
 		off:           off,
 	}
@@ -66,14 +70,14 @@ func (link *NBurstSource) Tick() int {
 		}
 		link.periodLengths[i]--
 		//At the end of the period decide on new period type and length
-		if periodLengths <= 0 {
-			r := rand.Float64()
-			if r > on_prob {
+		if link.periodLengths[i] <= 0 {
+			if link.periodTypes[i] == 0 {
+				//Traffic is interchangable
 				link.periodTypes[i] = 1
-				link.periodLengths[i] = int(on.Rand())
+				link.periodLengths[i] = int(link.on.Rand())
 			} else {
 				link.periodTypes[i] = 0
-				link.periodLengths[i] = int(off.Rand())
+				link.periodLengths[i] = int(link.off.Rand())
 			}
 		}
 	}
@@ -108,8 +112,6 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 		panic("cannot seed math/rand package with cryptographically secure random number generator")
 	}
 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
-	//math_rand.Seed(time.Now().UnixNano() + 1)
-	//fmt.Println(time.Now().UnixNano())
 	values := make([]float64, 0)
 	c := true
 	Resolution := 0.01
@@ -182,4 +184,27 @@ func (tpt *TPT) AverageDisc() float64 {
 		average += float64(i+1) * pdf[i]
 	}
 	return average
+}
+
+// For the csv logs Returns the list of the values
+func (link *NBurstSource) GetValues() ([]string, []string) {
+
+	e := reflect.ValueOf(&link).Elem()
+	nameList := make([]string, 0)
+	valueList := make([]string, 0)
+
+	for i := 0; i < e.NumField(); i++ {
+		varName := e.Type().Field(i).Name
+		varType := e.Type().Field(i).Type
+		varValue := e.Field(i).Interface()
+
+		if varType.Kind() != reflect.Int || varType.Kind() != reflect.Float64 {
+			continue
+		}
+
+		nameList = append(nameList, fmt.Sprintf("NBURST-%v", varName))
+		valueList = append(valueList, fmt.Sprintf("%v", varValue))
+	}
+
+	return nameList, valueList
 }

@@ -1,0 +1,2 @@
+GEWI-Rate,GEWI-CBuff,GEWI-CBuffS,GEWI-Recv,GEWI-Transm,GEWI-Droppd,GEWI-Step,GEWI-AvgC,GEWI-MWT,GEWI-MWTstddev,GEWI-MWTvar,GEWI-MWTsquare,GEWI-Gain,GEWI-Cost,GEWI-Rate,GEWI-Mult,GEWI-EnBuff,GEWI-EnBuffS,GEWI-CBuff,GEWI-CBuffS,GEWI-Recv,GEWI-Transm,GEWI-Droppd,GEWI-Step,GEWI-AvgE,GEWI-AvgC,GEWI-MWT,GEWI-MWTstddev,GEWI-MWTvar,GEWI-MWTsquare,PARETO-NodeCount,PARETO-Shape_on,PARETO-Scale_on,PARETO-Shape_off,PARETO-Scale_off,PARETO-On_prob
+10,1,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,30,7,0,0,0,0,0,0,0,0,0,0,0,10,1.2,1.2,8,8,0.5
