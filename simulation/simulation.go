@@ -3,7 +3,6 @@ package simulation
 import (
 	"encoding/csv"
 	"errors"
-	"fmt"
 	"os"
 	"sync"
 )
@@ -25,29 +24,22 @@ func StoreResults(dirName, fileName string, objList ...Storable) {
 	valueNames, values := make([]string, 0), make([]string, 0)
 	for _, sto := range objList {
 		nam, val := sto.GetValues()
-		fmt.Println(val, nam)
 		valueNames = append(valueNames, nam...)
 		values = append(values, val...)
-		fmt.Println("Excuseme", valueNames)
 	}
 	// Checking/Creating directory
 	if err := checkCreateDir(dirName); err != nil {
 		panic("Error encountered: Directory could not be created.")
 	}
 
-	fmt.Println("Value names", valueNames)
-
 	// Checking/Creating csv file
 	if exists, err := fileExists(dirName, fileName); err == nil {
-		fmt.Println(exists)
 		if !exists {
-			fmt.Println("Here")
 			//Create file and write the first line
 			f, errr := os.OpenFile(dirName+"/"+fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if errr != nil {
 				panic("Error encountered: CSV File could not be created.")
 			}
-			fmt.Println(valueNames)
 			w := csv.NewWriter(f)
 			w.Write(valueNames)
 			w.Flush()
@@ -89,12 +81,9 @@ func checkCreateDir(dirName string) error {
 // Check if file exists, if it doesn't exist it creates it and returns false
 // otherwise it resturns true
 func fileExists(dirName, fileName string) (bool, error) {
-	fmt.Println("Testing if file exists")
 	if _, err := os.Stat(dirName + "/" + fileName); errors.Is(err, os.ErrNotExist) {
-		fmt.Println("False")
 		return false, nil
 	}
 
-	fmt.Println("True")
 	return true, nil
 }

@@ -110,7 +110,7 @@ func (link *ParetoSelfSimilarSource) Tick() int {
 // Uses the source to generate the traffic time series
 func (link *ParetoSelfSimilarSource) GetTrafficTimeSeries(length int) []int {
 	ts := make([]int, 0)
-	for i := 0; i < len(ts); i++ {
+	for i := 0; i < length; i++ {
 		ts = append(ts, link.Tick())
 	}
 	return ts
@@ -136,7 +136,6 @@ func (link *ParetoSelfSimilarSource) AverageEmpirical(rounds int) float64 {
 
 // For the csv logs Returns the list of the values
 func (obj *ParetoSelfSimilarSource) GetValues() ([]string, []string) {
-	fmt.Println("Saving pareto variables")
 	e := reflect.ValueOf(&obj).Elem().Elem()
 
 	nameList := make([]string, 0)

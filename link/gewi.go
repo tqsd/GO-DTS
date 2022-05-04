@@ -167,16 +167,21 @@ func (link *gewi) UpdateMeanWaitingTime(transmission float64) {
 		waitTime += float64(link.Wait[i])
 	}
 
-	link.MWT = (link.MWT*link.Transm + waitTime) / transmission
+	link.MWT = (link.MWT*link.Transm + waitTime) / (transmission + link.Transm)
 }
 
 func (link *gewi) AdjustWaitQueue(stepTransmission float64) {
+	// If nothing was sent no adjusting needed
+	if stepTransmission == 0 {
+		return
+	}
 	// Shift the wait queue
 	zeros := make([]uint64, int(stepTransmission))
 	for i := 0; i < int(stepTransmission); i++ {
 		zeros[i] = 0
 	}
-	link.Wait = append(link.Wait[int(stepTransmission)-1:len(link.Wait)], zeros...)
+
+	link.Wait = append(link.Wait[int(stepTransmission):len(link.Wait)], zeros...)
 }
 
 func (link *gewi) ProcessGeneratedTraffic(traffic []int) {
@@ -187,7 +192,6 @@ func (link *gewi) ProcessGeneratedTraffic(traffic []int) {
 
 // For the csv logs Returns the list of the values
 func (obj *gewi) GetValues() ([]string, []string) {
-	fmt.Println("Getting values")
 
 	e := reflect.ValueOf(&obj).Elem().Elem()
 

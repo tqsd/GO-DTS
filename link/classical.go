@@ -110,16 +110,20 @@ func (link *classical) UpdateMeanWaitingTime(transmission float64) {
 		waitTime += float64(link.Wait[i])
 	}
 
-	link.MWT = (link.MWT*link.Transm + waitTime) / transmission
+	link.MWT = (link.MWT*link.Transm + waitTime) / (transmission + link.Transm)
 }
 
+// Shift the wait queue
 func (link *classical) AdjustWaitQueue(stepTransmission float64) {
-	// Shift the wait queue
+	// If no data was sent don't update anything
+	if stepTransmission == 0 {
+		return
+	}
 	zeros := make([]uint64, int(stepTransmission))
 	for i := 0; i < int(stepTransmission); i++ {
 		zeros[i] = 0
 	}
-	link.Wait = append(link.Wait[int(stepTransmission)-1:len(link.Wait)], zeros...)
+	link.Wait = append(link.Wait[int(stepTransmission):len(link.Wait)], zeros...)
 }
 
 func (link *classical) ProcessGeneratedTraffic(traffic []int) {
@@ -130,7 +134,6 @@ func (link *classical) ProcessGeneratedTraffic(traffic []int) {
 
 // For the csv logs Returns the list of the values
 func (obj *classical) GetValues() ([]string, []string) {
-	fmt.Println("Getting values")
 
 	e := reflect.ValueOf(&obj).Elem().Elem()
 
