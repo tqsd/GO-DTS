@@ -13,8 +13,8 @@ import (
 
 type NBurstSource struct {
 	NodeCount     int
-	periodLengths []int
-	periodTypes   []int
+	PeriodLengths []int
+	PeriodTypes   []int
 
 	// Pareto Distribution for on/off trains specific to this model
 	T     int
@@ -23,8 +23,8 @@ type NBurstSource struct {
 	Gamma float64
 
 	// Randomness objects
-	on  TPT
-	off distuv.Poisson
+	On  TPT
+	Off distuv.Poisson
 }
 
 func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurstSource {
@@ -39,6 +39,8 @@ func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurs
 
 	periodTypes := make([]int, NodeCount)
 	periodLengths := make([]int, NodeCount)
+
+	// Decidint initial distribution
 	for i := 0; i < NodeCount; i++ {
 		periodTypes[i] = rand.Intn(2)
 		if periodTypes[i] == 1 {
@@ -49,14 +51,14 @@ func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurs
 	}
 	return NBurstSource{
 		NodeCount:     NodeCount,
-		periodLengths: periodLengths,
-		periodTypes:   periodTypes,
+		PeriodLengths: periodLengths,
+		PeriodTypes:   periodTypes,
 		T:             T,
 		Alpha:         alpha,
 		Theta:         theta,
 		Gamma:         gamma,
-		on:            on,
-		off:           off,
+		On:            on,
+		Off:           off,
 	}
 }
 
@@ -65,23 +67,31 @@ func (link *NBurstSource) Tick() int {
 	traffic := int(0)
 	for i := 0; i < link.NodeCount; i++ {
 
-		if link.periodTypes[i] == 1 {
+		if link.PeriodTypes[i] == 1 {
 			traffic++
 		}
-		link.periodLengths[i]--
+		link.PeriodLengths[i]--
 		//At the end of the period decide on new period type and length
-		if link.periodLengths[i] <= 0 {
-			if link.periodTypes[i] == 0 {
+		if link.PeriodLengths[i] <= 0 {
+			if link.PeriodTypes[i] == 0 {
 				//Traffic is interchangable
-				link.periodTypes[i] = 1
-				link.periodLengths[i] = int(link.on.Rand())
+				link.PeriodTypes[i] = 1
+				link.PeriodLengths[i] = int(link.On.Rand())
 			} else {
-				link.periodTypes[i] = 0
-				link.periodLengths[i] = int(link.off.Rand())
+				link.PeriodTypes[i] = 0
+				link.PeriodLengths[i] = int(link.Off.Rand())
 			}
 		}
 	}
 	return traffic
+}
+
+func (link *NBurstSource) GetTrafficTimeSeries(length int) []int {
+	ts := make([]int, 0)
+	for i := 0; i < length; i++ {
+		ts = append(ts, link.Tick())
+	}
+	return ts
 }
 
 //Truncated Power Tail distribution ---------
@@ -106,6 +116,9 @@ func r(T int, x, alpha, theta, gamma float64) float64 {
 }
 
 func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
+	if T < 1 {
+		panic("Truncation factors must be greater than 0")
+	}
 	var b [8]byte
 	_, err := crypto_rand.Read(b[:])
 	if err != nil {
@@ -117,7 +130,6 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 	Resolution := 0.01
 	for x := float64(0); c; x += Resolution {
 		values = append(values, r(T, x, alpha, theta, gamma))
-		//fmt.Println(x, values[len(values)-1])
 		if values[len(values)-1] < 0.0001 {
 			c = false
 		}
@@ -189,7 +201,7 @@ func (tpt *TPT) AverageDisc() float64 {
 // For the csv logs Returns the list of the values
 func (link *NBurstSource) GetValues() ([]string, []string) {
 
-	e := reflect.ValueOf(&link).Elem()
+	e := reflect.ValueOf(&link).Elem().Elem()
 	nameList := make([]string, 0)
 	valueList := make([]string, 0)
 
