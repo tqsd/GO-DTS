@@ -1,13 +1,15 @@
 
-set term wxt
+#set term wxt
+set terminal png size 2000,1000 enhanced font "Helvetica,20"
+set output 'output.png'
+
+#First line is the title
 set key autotitle columnhead
-
-
 
 set key outside
 unset key
-set ylabel "y-units" font "Times-Roman,8"
-set key font ",8"
+set ylabel "y-units" font "Times-Roman,5"
+set key font ",20"
 
 #set xrange [0:2000]
 unset border
@@ -24,6 +26,7 @@ set linetype 3 lc rgb "#21130d" lw 0.5 # TRAFFIC
 set linetype 4 lc rgb "#873e23" lw 2  # E-BUFFER
 set linetype 5 lc rgb "#bb000000" lw 1  # E-BUFFER, TRAFFIC AVERAGE
 
+set ytics font ", 15"
 
 #### THE PLOT WITH TRAFFIC
 
@@ -39,7 +42,7 @@ set ylabel "Transmission rate"
 plot "results/results.data" u 1:3 with lines lt 1 ,\
      "results/results.data" u 1:7 with lines lt 2
 
-set xtics font ", 5"
+set xtics font ", 15"
 set ylabel "Buffer state"
 set xlabel "Timestep"
 set format "%.f"

@@ -5,10 +5,11 @@ In this example we analize a time series created with the _Pareto based_ traffic
 The parameters need to be adjusted in the file ```main.go```.
 The simulation can be run by
 ```
-go run main.go results/results.data
+go run main.go results/results.data <num-of-nodes>
 ```
 
 Then the plots can be generated with gnuplot
 ```
 gnuplot --persist gplt.plt
 ```
+![Sample Plots](/sample.jpg?raw=true "Sample Plots")

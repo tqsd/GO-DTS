@@ -115,7 +115,7 @@ func main() {
 	}
 
 	fmt.Println("Running sim")
-	on := float64(1.5)
+	on := float64(1.6)
 	off := float64(1.5)
 	mult := float64(4)
 
@@ -148,7 +148,7 @@ func main() {
 	source := traffic.NewParetoSelfSimilarSource(setup.node_count, setup.on_scale, setup.on_shape,
 		setup.off_scale, setup.off_shape, setup.on_prob)
 
-	simulation_steps := 100000
+	simulation_steps := 50000
 	runway := int(float64(simulation_steps) * 0)
 	result := results{
 		names:               names,
