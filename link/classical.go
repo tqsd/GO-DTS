@@ -161,7 +161,7 @@ func (obj *classical) GetValues() ([]string, []string) {
 			continue
 		}
 
-		nameList = append(nameList, fmt.Sprintf("GEWI-%v", varName))
+		nameList = append(nameList, fmt.Sprintf("LINK-%v", varName))
 		valueList = append(valueList, fmt.Sprintf("%v", varValue))
 	}
 

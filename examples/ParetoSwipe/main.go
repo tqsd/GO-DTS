@@ -56,7 +56,7 @@ func generateSetups() []parameters {
 
 	// Cluster Size
 	nodeCounts := make([]int, 0)
-	for i := 2; i < 200; i += 2 {
+	for i := 2; i < 60; i += 2 {
 		nodeCounts = append(nodeCounts, i)
 	}
 
@@ -65,7 +65,7 @@ func generateSetups() []parameters {
 
 	//Multiplication factors
 	mults := make([]float64, 0)
-	for i := float64(1); i < 8; i++ {
+	for i := float64(1); i < 6; i++ {
 		mults = append(mults, math.Pow(2, i))
 	}
 
