@@ -85,31 +85,36 @@ func (link *gewi) ProcessSingleStep(incomming int) {
 		// If after transmission unused rate exists
 		stepTransmission = link.CBuffS
 		link.DistributeEntanglement(link.Rate - stepTransmission)
-		link.CBuffS = 0
 	} else {
 		for R := link.Rate; R > 0; R-- {
-			if link.CBuffS < R {
+			if link.CBuffS-stepTransmission < R {
+
 				// More rate than data to send
-				stepTransmission += link.CBuffS
-				link.DistributeEntanglement(R - link.CBuffS)
+				tmpTransmission := link.CBuffS - stepTransmission
+				link.DistributeEntanglement(R - tmpTransmission)
+				stepTransmission += tmpTransmission
 				break
-			} else if link.EnBuffS >= link.Cost && link.CBuffS >= link.Mult {
+			} else if link.EnBuffS >= link.Cost && link.CBuffS-stepTransmission >= link.Mult {
 				// Enough entanglement and data left for assisted transmission
+				//
+				//
 				stepTransmission += link.Mult
 				link.EnBuffS -= link.Cost
-				link.CBuffS -= link.Mult
+
 			} else {
 				// link.CBuffS > R || (link.EnBuffS < link.Cost)
 				// More data left to send than unasisted rate permits OR
 				// Not enough entanglement left  OR
 				// Less data left to send than assisted could send -> No padding
+				//
 				stepTransmission += R
-				link.CBuffS -= R
 				break
 			}
 		}
 	}
-
+	if link.EnBuffS < 0 || link.CBuffS < 0 {
+		panic("Negative entanglement status")
+	}
 	// Entanglement is Generated
 	// Amount to transmit is calculated
 	// Classical buffer state is reduced to appropriate amount
@@ -125,6 +130,7 @@ func (link *gewi) ProcessSingleStep(incomming int) {
 
 func (link *gewi) Transmit(stepTransmission float64) {
 	link.Transm += stepTransmission
+	link.CBuffS -= stepTransmission
 }
 
 // Update average entanglement buffer state

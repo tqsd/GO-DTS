@@ -28,12 +28,12 @@ func StoreResults(dirName, fileName string, objList ...Storable) {
 		values = append(values, val...)
 	}
 	// Checking/Creating directory
-	if err := checkCreateDir(dirName); err != nil {
+	if err := CheckCreateDir(dirName); err != nil {
 		panic("Error encountered: Directory could not be created.")
 	}
 
 	// Checking/Creating csv file
-	if exists, err := fileExists(dirName, fileName); err == nil {
+	if exists, err := FileExists(dirName, fileName); err == nil {
 		if !exists {
 			//Create file and write the first line
 			f, errr := os.OpenFile(dirName+"/"+fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -66,7 +66,7 @@ func StoreResults(dirName, fileName string, objList ...Storable) {
 }
 
 // Checks if given directory exists. If it doesn't it is created
-func checkCreateDir(dirName string) error {
+func CheckCreateDir(dirName string) error {
 	if _, err := os.Stat("dirName"); err != nil {
 		if os.IsNotExist(err) {
 			// file does not exist; Create file
@@ -80,7 +80,7 @@ func checkCreateDir(dirName string) error {
 
 // Check if file exists, if it doesn't exist it creates it and returns false
 // otherwise it resturns true
-func fileExists(dirName, fileName string) (bool, error) {
+func FileExists(dirName, fileName string) (bool, error) {
 	if _, err := os.Stat(dirName + "/" + fileName); errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}

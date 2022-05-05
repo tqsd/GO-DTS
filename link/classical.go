@@ -33,20 +33,26 @@ type classical struct {
 	MWTvar float64
 	// Mean waiting time square
 	MWTsquare float64
+	// Transmissions list
+	TransmissionsTS []int
+	// Drops list
+	DropTS []int
 }
 
 func NewClassical(R, B float64) classical {
 
 	return classical{
-		Rate:   R,
-		CBuff:  B,
-		CBuffS: 0,
-		Recv:   0,
-		Transm: 0,
-		Droppd: 0,
-		Step:   0,
-		AvgC:   0,
-		Wait:   make([]uint64, int(B)),
+		Rate:            R,
+		CBuff:           B,
+		CBuffS:          0,
+		Recv:            0,
+		Transm:          0,
+		Droppd:          0,
+		Step:            0,
+		AvgC:            0,
+		Wait:            make([]uint64, int(B)),
+		TransmissionsTS: make([]int, 0),
+		DropTS:          make([]int, 0),
 	}
 }
 
@@ -80,7 +86,12 @@ func (link *classical) ProcessSingleStep(incomming int) {
 }
 
 func (link *classical) Transmit(stepTransmission float64) {
+	link.TransmissionsTS = append(link.TransmissionsTS, int(stepTransmission))
 	link.Transm += stepTransmission
+	link.CBuffS -= stepTransmission
+	if link.CBuffS < 0 {
+		panic("CBUFF Bellow zero")
+	}
 }
 
 // Update average entanglement buffer state
@@ -100,6 +111,7 @@ func (link *classical) DropExcessData() {
 	if link.CBuffS > link.CBuff {
 		link.Droppd += (link.CBuffS - link.CBuff)
 		link.CBuffS = link.CBuff
+		link.DropTS = append(link.DropTS, int(link.CBuffS-link.CBuff))
 	}
 }
 
