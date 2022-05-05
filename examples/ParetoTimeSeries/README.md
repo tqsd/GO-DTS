@@ -12,4 +12,4 @@ Then the plots can be generated with gnuplot
 ```
 gnuplot --persist gplt.plt
 ```
-![Sample Plots](./sample.jpg?raw=true "Sample Plots")
+![Sample Plots](./sample.png?raw=true "Sample Plots")
