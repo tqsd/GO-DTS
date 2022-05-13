@@ -109,12 +109,12 @@ func main() {
 		}
 	}
 
-	node_count := 2
+	node_count := 1
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
 
-	T := 2
+	T := 1
 	alpha := float64(1.4)
 	theta := float64(0.5)
 	gamma := math.Pow((1 / theta), (1 / alpha))
