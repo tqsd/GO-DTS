@@ -7,7 +7,6 @@ import (
 	"github.com/tqsd/dts/link"
 	"github.com/tqsd/dts/simulation"
 	"github.com/tqsd/dts/traffic"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -15,11 +14,10 @@ import (
 
 type parameters struct {
 	//Traffic Source Parameters
-	node_count int
-	T          int
-	alpha      float64
-	theta      float64
-	gamma      float64
+	node_count   int
+	onPeriodLen  int
+	offPeriodLen int
+	start        int
 
 	//GEWI link parameters
 	gain      float64
@@ -109,36 +107,31 @@ func main() {
 		}
 	}
 
-	node_count := 1
+	node_count := 2
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
-
-	T := 1
-	alpha := float64(1.4)
-	theta := float64(0.5)
-	gamma := math.Pow((1 / theta), (1 / alpha))
 
 	mult := float64(2)
 
 	cost := float64(1)
 	gain := float64(1 / (mult - 1))
+	onPeriodLen := 100
+	offPeriodLen := 100
 
 	setup := parameters{
-		node_count: node_count,
-		T:          T,
-		alpha:      alpha,
-		theta:      theta,
-		gamma:      gamma,
-		gain:       gain,
-		cost:       cost,
-		gewi_rate:  float64(node_count) / 2,
-		mult:       mult,
-		E:          float64(node_count) * mult * cost,
-		e:          0,
-		gewi_B:     float64(node_count) * mult,
-		link_rate:  float64(node_count) / 2,
-		link_B:     float64(1) * float64(node_count) * mult,
+		node_count:   node_count,
+		onPeriodLen:  onPeriodLen,
+		offPeriodLen: offPeriodLen,
+		gain:         gain,
+		cost:         cost,
+		gewi_rate:    float64(node_count) / 2,
+		mult:         mult,
+		E:            float64(onPeriodLen*2) * float64(node_count) * mult * cost,
+		e:            0,
+		gewi_B:       float64(4) * float64(node_count) * mult,
+		link_rate:    float64(1) * float64(node_count) / 2,
+		link_B:       float64(4) * float64(node_count) * mult,
 	}
 
 	gewi := link.NewGewi(setup.gain, setup.cost, setup.gewi_rate,
@@ -146,14 +139,9 @@ func main() {
 	classic := link.NewClassical(setup.link_rate, setup.link_B)
 
 	// Creating Traffic source
-	//source := traffic.NewParetoSelfSimilarSource(setup.node_count, setup.on_scale, setup.on_shape,
-	//	setup.off_scale, setup.off_shape, setup.on_prob)
-	source := traffic.NewNBurstTrafficSource(setup.node_count, setup.T, setup.alpha,
-		setup.theta, setup.gamma)
+	source := traffic.NewPerfectTrafficBurstSource(setup.node_count, setup.onPeriodLen, setup.offPeriodLen)
 
-	fmt.Println(source.On.AverageDisc())
-
-	simulation_steps := 10000
+	simulation_steps := 1000
 	runway := int(float64(simulation_steps) * 0.1)
 	result := results{
 		names:               names,

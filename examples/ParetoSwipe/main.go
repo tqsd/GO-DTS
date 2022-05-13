@@ -70,7 +70,6 @@ func generateSetups() []parameters {
 	}
 
 	// Create Combinations of setups
-
 	setups := make([]parameters, 0)
 	for _, on := range on_shapes {
 		for _, off := range on_shapes {
