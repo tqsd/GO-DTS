@@ -170,6 +170,9 @@ func (link *gewi) DistributeEntanglement(idleRate float64) {
 func (link *gewi) UpdateMeanWaitingTime(transmission float64) {
 	waitTime := float64(0)
 	for i := 0; i < int(transmission); i++ {
+		if i >= len(link.Wait) {
+			break
+		}
 		waitTime += float64(link.Wait[i])
 	}
 
@@ -180,6 +183,9 @@ func (link *gewi) AdjustWaitQueue(stepTransmission float64) {
 	// If nothing was sent no adjusting needed
 	if stepTransmission == 0 {
 		return
+	}
+	if stepTransmission > float64(len(link.Wait)) {
+		stepTransmission = float64(len(link.Wait))
 	}
 	// Shift the wait queue
 	zeros := make([]uint64, int(stepTransmission))

@@ -108,17 +108,17 @@ func main() {
 		}
 	}
 
-	node_count := 2
+	node_count := 500
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
 
-	T := 10
+	T := 1
 	alpha := float64(1.4)
 	theta := float64(0.5)
 	gamma := math.Pow((1 / theta), (1 / alpha))
 
-	mult := float64(2)
+	mult := float64(512)
 
 	cost := float64(1)
 	gain := float64(1 / (mult - 1))
@@ -152,7 +152,7 @@ func main() {
 
 	fmt.Println(source.On.AverageDisc())
 
-	simulation_steps := 10000
+	simulation_steps := 50000
 	runway := int(float64(simulation_steps) * 0.1)
 	result := results{
 		names:               names,
@@ -189,7 +189,7 @@ func main() {
 		result.clsc_buffer_state = append(result.clsc_buffer_state, classic.CBuffS)
 	}
 
-	run_number := 1000000
+	run_number := 10000
 	onPeriods := make([]float64, 0)
 	offPeriods := make([]float64, 0)
 
