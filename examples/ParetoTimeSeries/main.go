@@ -109,13 +109,13 @@ func main() {
 		}
 	}
 
-	node_count := 2
+	node_count := 50
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
 
 	fmt.Println("Running sim")
-	on := float64(1.6)
+	on := float64(1.5)
 	off := float64(1.5)
 	mult := float64(4)
 

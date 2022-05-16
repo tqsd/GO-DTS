@@ -4,11 +4,12 @@ import (
 	crypto_rand "crypto/rand"
 	"encoding/binary"
 	"fmt"
-	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/stat/distuv"
 	"math"
 	math_rand "math/rand"
 	"reflect"
+
+	"golang.org/x/exp/rand"
+	"gonum.org/v1/gonum/stat/distuv"
 )
 
 type NBurstSource struct {
@@ -25,9 +26,19 @@ type NBurstSource struct {
 	// Randomness objects
 	On  TPT
 	Off distuv.Poisson
+
+	// Checking
+	Avg            float64
+	Step           int
+	OnPeriod       int
+	OnPeriodCount  int
+	OffPeriod      int
+	OffPeriodCount int
+	OffCounter     int
 }
 
 func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurstSource {
+
 	on := NewTruncatedPowerTailDistribution(T, alpha, theta, gamma)
 
 	var b1 [8]byte
@@ -40,13 +51,17 @@ func NewNBurstTrafficSource(NodeCount, T int, alpha, theta, gamma float64) NBurs
 	periodTypes := make([]int, NodeCount)
 	periodLengths := make([]int, NodeCount)
 
+	pType := 0
 	// Decidint initial distribution
 	for i := 0; i < NodeCount; i++ {
-		periodTypes[i] = rand.Intn(2)
+		periodTypes[i] = pType
+
 		if periodTypes[i] == 1 {
 			periodLengths[i] = int(on.Rand())
+			pType = 1
 		} else {
 			periodLengths[i] = int(off.Rand())
+			pType = 1
 		}
 	}
 	return NBurstSource{
@@ -77,11 +92,32 @@ func (link *NBurstSource) Tick() int {
 				//Traffic is interchangable
 				link.PeriodTypes[i] = 1
 				link.PeriodLengths[i] = int(link.On.Rand())
+				link.OnPeriod += link.PeriodLengths[i]
+				link.OnPeriodCount++
 			} else {
 				link.PeriodTypes[i] = 0
-				link.PeriodLengths[i] = int(link.Off.Rand())
+				r := link.Off.Rand()
+				link.PeriodLengths[i] = int(r)
+				link.OffPeriod += link.PeriodLengths[i]
+				link.OffPeriodCount++
+
+				if r == 0 {
+					// has to be bigger than 0,
+					link.PeriodTypes[i] = 1
+					link.PeriodLengths[i] = int(link.On.Rand())
+					link.OnPeriod += link.PeriodLengths[i]
+					link.OnPeriodCount++
+				}
 			}
 		}
+	}
+	//fmt.Println(traffic, link.PeriodTypes, link.PeriodLengths, "OnC:", link.OnPeriodCount, "OffC:", link.OffPeriodCount,
+	//	"OnPT", link.OnPeriod, "OffPT:", link.OffPeriod, "/", link.OffCounter)
+	//fmt.Println(link.PeriodLengths, link.PeriodTypes, avrg(link.PeriodTypes))
+	link.Avg = (link.Avg*float64(link.Step) + float64(traffic)) / (float64(link.Step) + 1)
+	link.Step++
+	if traffic == 0 {
+		link.OffCounter++
 	}
 	return traffic
 }
@@ -116,9 +152,17 @@ func r(T int, x, alpha, theta, gamma float64) float64 {
 }
 
 func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
+
 	if T < 1 {
 		panic("Truncation factors must be greater than 0")
 	}
+	if gamma < 1 {
+		panic("gamma should be > 1")
+	}
+	if theta > 1 || theta < 0 {
+		panic("It should hold 0 < theta < 1")
+	}
+
 	var b [8]byte
 	_, err := crypto_rand.Read(b[:])
 	if err != nil {
@@ -127,14 +171,20 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 	values := make([]float64, 0)
 	c := true
-	Resolution := 0.01
+	Resolution := 0.001
+
 	for x := float64(0); c; x += Resolution {
 		values = append(values, r(T, x, alpha, theta, gamma))
-		if values[len(values)-1] < 0.0001 {
+		if values[len(values)-1] < 0.1 {
 			c = false
+		}
+		if values[len(values)-1] == math.Inf(+1) {
+			panic("INFINITY")
 		}
 	}
 
+	mu := (1 - theta) / (1 - gamma*theta)
+	fmt.Println("MU: ", mu)
 	valuesum := float64(0)
 	for i := 0; i < len(values); i++ {
 		valuesum += values[i]
@@ -176,6 +226,8 @@ func (tpt *TPT) Moments(l uint) float64 {
 	}
 	mu := (1 - tpt.theta) / (1 - tpt.gamma*tpt.theta)
 	temp3 := float64(factorial) / math.Pow(mu, float64(l))
+
+	fmt.Println("Third Term:", temp3, "With T:", tpt.T, " ,theta:", tpt.theta, " ,gamma:", tpt.gamma)
 	return temp1 * temp2 * temp3
 }
 
@@ -210,13 +262,19 @@ func (link *NBurstSource) GetValues() ([]string, []string) {
 		varType := e.Type().Field(i).Type
 		varValue := e.Field(i).Interface()
 
-		if varType.Kind() != reflect.Int || varType.Kind() != reflect.Float64 {
+		if varType.Kind() != reflect.Int && varType.Kind() != reflect.Float64 {
 			continue
 		}
-
 		nameList = append(nameList, fmt.Sprintf("NBURST-%v", varName))
 		valueList = append(valueList, fmt.Sprintf("%v", varValue))
 	}
-
 	return nameList, valueList
+}
+
+func avrg(arr []int) float64 {
+	avg := float64(0)
+	for i, val := range arr {
+		avg = (avg*float64(i) + float64(val)) / (float64(i) + 1)
+	}
+	return avg
 }

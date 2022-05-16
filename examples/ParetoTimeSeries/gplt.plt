@@ -1,6 +1,6 @@
 
 #set term wxt
-set terminal png size 2000,1000 enhanced font "Helvetica,20"
+set terminal png size 2000,1000 #enhanced font "Helvetica,20"
 set output 'output.png'
 
 #First line is the title
@@ -8,7 +8,7 @@ set key autotitle columnhead
 
 set key outside
 unset key
-set ylabel "y-units" font "Times-Roman,5"
+set ylabel "y-units"# font "Helvetica,5"
 set key font ",20"
 
 #set xrange [0:2000]
