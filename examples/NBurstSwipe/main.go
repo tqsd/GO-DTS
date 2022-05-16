@@ -40,7 +40,7 @@ type parameters struct {
 func generateSetups() []parameters {
 	// Traffic source parameters
 	T := make([]int, 0)
-	for t := 1; t < 10; t++ {
+	for t := 5; t < 10; t++ {
 		T = append(T, t)
 	}
 
@@ -56,7 +56,7 @@ func generateSetups() []parameters {
 
 	//Multiplication factors
 	mults := make([]float64, 0)
-	for i := float64(1); i < 5; i++ {
+	for i := float64(5); i < 10; i++ {
 		mults = append(mults, math.Pow(2, i))
 	}
 	setups := make([]parameters, 0)
@@ -111,7 +111,7 @@ func simulate(fileName string, setup parameters) {
 
 // Set appropriate constants for your setup
 const LENGTH_OF_TIMESERIES = 1000
-const REPEAT_RUNS = 1
+const REPEAT_RUNS = 5
 const MAX_NUM_OF_GO_ROUTINES = 1
 
 func main() {

@@ -1,5 +1,5 @@
 
-set term wxt
+set term x11
 set key autotitle columnhead
 
 

@@ -58,7 +58,6 @@ func write_to_file_gnuplot_style(dirName, fileName string, r results) {
 
 	if exists, err := simulation.FileExists(dirName, fileName); err == nil {
 		if exists {
-			fmt.Println("File will be overwriten")
 			os.Remove(dirName + "/" + fileName)
 		}
 	} else {
@@ -73,7 +72,7 @@ func write_to_file_gnuplot_style(dirName, fileName string, r results) {
 	datawriter := bufio.NewWriter(f)
 
 	// column names
-	fmt.Println(strings.Join(r.names[:], " ") + "\n")
+	//fmt.Println(strings.Join(r.names[:], " ") + "\n")
 
 	_, _ = datawriter.WriteString(strings.Join(r.names[:], " ") + "\n")
 
@@ -109,12 +108,12 @@ func main() {
 		}
 	}
 
-	node_count := 1
+	node_count := 2
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
 
-	T := 1
+	T := 10
 	alpha := float64(1.4)
 	theta := float64(0.5)
 	gamma := math.Pow((1 / theta), (1 / alpha))
@@ -136,9 +135,9 @@ func main() {
 		mult:       mult,
 		E:          float64(node_count) * mult * cost,
 		e:          0,
-		gewi_B:     float64(node_count) * mult,
+		gewi_B:     float64(node_count),
 		link_rate:  float64(node_count) / 2,
-		link_B:     float64(1) * float64(node_count) * mult,
+		link_B:     float64(node_count),
 	}
 
 	gewi := link.NewGewi(setup.gain, setup.cost, setup.gewi_rate,
@@ -190,5 +189,25 @@ func main() {
 		result.clsc_buffer_state = append(result.clsc_buffer_state, classic.CBuffS)
 	}
 
+	run_number := 1000000
+	onPeriods := make([]float64, 0)
+	offPeriods := make([]float64, 0)
+
+	for i := 0; i < run_number; i++ {
+		onPeriods = append(onPeriods, float64(source.On.Rand()))
+		offPeriods = append(offPeriods, float64(source.Off.Rand()))
+	}
+	fmt.Println(average(onPeriods))
+	fmt.Println(average(offPeriods))
+
+	fmt.Println("Average:", average(result.incoming))
 	write_to_file_gnuplot_style("results", fileName, result)
+}
+
+func average(arr []float64) float64 {
+	avg := float64(0)
+	for i, val := range arr {
+		avg = (avg*float64(i) + float64(val)) / (float64(i) + 1)
+	}
+	return avg
 }
