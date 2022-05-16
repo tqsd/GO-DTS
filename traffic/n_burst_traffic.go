@@ -183,7 +183,7 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 		}
 	}
 
-	mu := (1 - theta) / (1 - gamma*theta)
+	//mu := (1 - theta) / (1 - gamma*theta)
 	valuesum := float64(0)
 	for i := 0; i < len(values); i++ {
 		valuesum += values[i]
