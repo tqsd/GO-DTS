@@ -184,7 +184,6 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 	}
 
 	mu := (1 - theta) / (1 - gamma*theta)
-	fmt.Println("MU: ", mu)
 	valuesum := float64(0)
 	for i := 0; i < len(values); i++ {
 		valuesum += values[i]
@@ -197,7 +196,6 @@ func NewTruncatedPowerTailDistribution(T int, alpha, theta, gamma float64) TPT {
 	for i := 1; i < len(Cdf); i++ {
 		Cdf[i] = Cdf[i-1] + values[i]
 	}
-	//fmt.Println(values)
 	//fmt.Println(cdf)
 	return TPT{T: T, alpha: alpha, theta: theta, gamma: gamma, Pdf: values, Cdf: Cdf, Resolution: Resolution}
 
