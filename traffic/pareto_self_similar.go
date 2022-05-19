@@ -49,7 +49,7 @@ func NewParetoSelfSimilarSource(NodeCount int, Scale_on, Shape_on, Scale_off, Sh
 
 	off_pareto := distuv.Pareto{
 		Xm:    Scale_off,
-		Alpha: Shape_on,
+		Alpha: Shape_off,
 		Src:   rand.NewSource(binary.LittleEndian.Uint64(b2[:])),
 	}
 

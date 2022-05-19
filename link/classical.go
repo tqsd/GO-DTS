@@ -119,6 +119,9 @@ func (link *classical) DropExcessData() {
 func (link *classical) UpdateMeanWaitingTime(transmission float64) {
 	waitTime := float64(0)
 	for i := 0; i < int(transmission); i++ {
+		if i >= len(link.Wait) {
+			break
+		}
 		waitTime += float64(link.Wait[i])
 	}
 
@@ -127,14 +130,19 @@ func (link *classical) UpdateMeanWaitingTime(transmission float64) {
 
 // Shift the wait queue
 func (link *classical) AdjustWaitQueue(stepTransmission float64) {
-	// If no data was sent don't update anything
+	// If nothing was sent no adjusting needed
 	if stepTransmission == 0 {
 		return
 	}
+	if stepTransmission > float64(len(link.Wait)) {
+		stepTransmission = float64(len(link.Wait))
+	}
+	// Shift the wait queue
 	zeros := make([]uint64, int(stepTransmission))
 	for i := 0; i < int(stepTransmission); i++ {
 		zeros[i] = 0
 	}
+
 	link.Wait = append(link.Wait[int(stepTransmission):len(link.Wait)], zeros...)
 }
 
