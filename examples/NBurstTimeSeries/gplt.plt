@@ -8,6 +8,7 @@ set key outside
 unset key
 set ylabel "y-units" font "Times-Roman,8"
 set key font ",8"
+set xrange [999000:1000000]
 
 #set xrange [0:2000]
 unset border

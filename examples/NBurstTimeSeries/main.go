@@ -108,17 +108,17 @@ func main() {
 		}
 	}
 
-	node_count := 500
+	node_count := 100
 	if len(args) > 2 {
 		node_count, _ = strconv.Atoi(args[2])
 	}
 
-	T := 1
+	T := 10
 	alpha := float64(1.4)
 	theta := float64(0.5)
 	gamma := math.Pow((1 / theta), (1 / alpha))
 
-	mult := float64(512)
+	mult := float64(32)
 
 	cost := float64(1)
 	gain := float64(1 / (mult - 1))
@@ -135,9 +135,9 @@ func main() {
 		mult:       mult,
 		E:          float64(node_count) * mult * cost,
 		e:          0,
-		gewi_B:     float64(node_count),
+		gewi_B:     float64(100), //float64(node_count) / 2,
 		link_rate:  float64(node_count) / 2,
-		link_B:     float64(node_count),
+		link_B:     float64(100), //float64(node_count) / 2,
 	}
 
 	gewi := link.NewGewi(setup.gain, setup.cost, setup.gewi_rate,
@@ -152,7 +152,7 @@ func main() {
 
 	fmt.Println(source.On.AverageDisc())
 
-	simulation_steps := 50000
+	simulation_steps := 1000000
 	runway := int(float64(simulation_steps) * 0.1)
 	result := results{
 		names:               names,
@@ -170,6 +170,8 @@ func main() {
 	for s := 0; s < simulation_steps; s++ {
 		if s < runway {
 			continue
+		} else if s == runway {
+			gewi.ResetStats() //TODO
 		}
 		gewi_transmitting_old := gewi.Transm
 		gewi_dropping_old := gewi.Droppd
@@ -189,7 +191,7 @@ func main() {
 		result.clsc_buffer_state = append(result.clsc_buffer_state, classic.CBuffS)
 	}
 
-	run_number := 10000
+	run_number := 1000
 	onPeriods := make([]float64, 0)
 	offPeriods := make([]float64, 0)
 
@@ -202,6 +204,9 @@ func main() {
 
 	fmt.Println("Average:", average(result.incoming))
 	write_to_file_gnuplot_style("results", fileName, result)
+	fmt.Println("MWT", classic.MWT-gewi.MWT)
+	fmt.Println("DROPP", classic.Droppd/classic.Recv-gewi.Droppd/gewi.Recv)
+	fmt.Println("BUFFER STATE AVG:", classic.AvgC, gewi.AvgC, gewi.AvgE)
 }
 
 func average(arr []float64) float64 {

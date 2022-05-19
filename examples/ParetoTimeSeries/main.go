@@ -73,7 +73,7 @@ func write_to_file_gnuplot_style(dirName, fileName string, r results) {
 	datawriter := bufio.NewWriter(f)
 
 	// column names
-	fmt.Println(strings.Join(r.names[:], " ") + "\n")
+	//fmt.Println(strings.Join(r.names[:], " ") + "\n")
 
 	_, _ = datawriter.WriteString(strings.Join(r.names[:], " ") + "\n")
 
@@ -115,9 +115,9 @@ func main() {
 	}
 
 	fmt.Println("Running sim")
-	on := float64(1.5)
-	off := float64(1.5)
-	mult := float64(4)
+	on := float64(1.9)
+	off := float64(1.89)
+	mult := float64(2)
 
 	cost := float64(1)
 	gain := float64(1 / (mult - 1))
@@ -133,11 +133,11 @@ func main() {
 		cost:       cost,
 		gewi_rate:  float64(node_count) / 2,
 		mult:       mult,
-		E:          8 * float64(node_count) * mult * cost,
+		E:          float64(node_count) * 10,
 		e:          0,
-		gewi_B:     8 * float64(node_count) * mult,
+		gewi_B:     float64(node_count) * 10,
 		link_rate:  float64(node_count) / 2,
-		link_B:     float64(8) * float64(node_count) * mult,
+		link_B:     float64(node_count) * 10,
 	}
 
 	gewi := link.NewGewi(setup.gain, setup.cost, setup.gewi_rate,
@@ -148,7 +148,7 @@ func main() {
 	source := traffic.NewParetoSelfSimilarSource(setup.node_count, setup.on_scale, setup.on_shape,
 		setup.off_scale, setup.off_shape, setup.on_prob)
 
-	simulation_steps := 50000
+	simulation_steps := 100000
 	runway := int(float64(simulation_steps) * 0)
 	result := results{
 		names:               names,
@@ -164,6 +164,7 @@ func main() {
 	}
 	//GENERATING TIMESTEPS
 	for s := 0; s < simulation_steps; s++ {
+		incoming := source.Tick()
 		if s < runway {
 			continue
 		}
@@ -171,7 +172,6 @@ func main() {
 		gewi_dropping_old := gewi.Droppd
 		clsc_transmitting_old := classic.Transm
 		clsc_dropping_old := classic.Droppd
-		incoming := source.Tick()
 		gewi.ProcessSingleStep(incoming)
 		classic.ProcessSingleStep(incoming)
 		result.steps = append(result.steps, float64(s))
@@ -185,5 +185,19 @@ func main() {
 		result.clsc_buffer_state = append(result.clsc_buffer_state, classic.CBuffS)
 	}
 
+	fmt.Println("Average buffer GEWI", gewi.AvgC/gewi.CBuff, "DropRate", gewi.Droppd/gewi.Recv, "MWT", gewi.MWT, "AvgRate ", gewi.Transm/float64(gewi.Step))
+	fmt.Println("Average buffer CLSK", classic.AvgC/classic.CBuff, "DropRate", classic.Droppd/classic.Recv, "MWT", classic.MWT, "AvgRate", classic.Transm/float64(gewi.Step))
+
+	fmt.Println("Average rate", gewi.Recv/float64(gewi.Step))
+	avg := source.On.Mean() * source.On_prob / (source.On.Mean()*source.On_prob + (1-setup.on_prob)*source.Off.Mean())
+	avg = avg * float64(source.NodeCount)
+	fmt.Println("Expected AVG", avg)
+	fmt.Println(source.On.Alpha, source.On.Xm)
+	fmt.Println(source.Off.Alpha, source.Off.Xm)
+	fmt.Println(source.On_prob)
+
 	write_to_file_gnuplot_style("results", fileName, result)
+	//Run gnuplot
+	//c = exec.Command("gnuplot gplt.plt")
+
 }

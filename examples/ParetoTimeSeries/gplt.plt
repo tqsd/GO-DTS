@@ -11,7 +11,7 @@ unset key
 set ylabel "y-units"# font "Helvetica,5"
 set key font ",20"
 
-#set xrange [0:2000]
+#set xrange [10000:12000]
 unset border
 
 
@@ -33,6 +33,7 @@ set ytics font ", 15"
 set format x ''
 set ylabel "Incoming"
 plot "results/results.data" u 1:2 with lines lt 3
+
 ### THE PLOT WITH DROPS
 set ylabel "Droped"
 plot "results/results.data" u 1:8 with lines lt 2

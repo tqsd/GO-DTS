@@ -2,8 +2,9 @@ set term x11
 #set terminal png size 1000,400 enhanced font ",20"
 #set output 'output.png'
 
-#set term epslatex
+#set term cairolatex pdf
 #set output "mwt_pareto.tex"
+
 
 #set terminal push
 #set terminal lua tikz fulldoc createstyle
@@ -11,7 +12,7 @@ set term x11
 
 set key autotitle columnhead
 set datafile separator ','
-filename = "results/4.csv"
+filename = "results/2.csv"
 
 
 #set title "Mean Wait Time Difference"
@@ -25,7 +26,7 @@ set logscale y 10
 
 set border back
 
-set ylabel "log(d^{ (C)}_W -  d^{ (G)}_W)" font ",12" offset 2
+set ylabel "$\\log(d^{ (C)}_W -  d^{(G)}_W)$" font ",12" offset 2
 set xlabel "N" font ",12" offset 0,0.7
 set xtics font ",5"
 set xtics 0,50,200
@@ -39,31 +40,34 @@ set multiplot layout 1,3\
               margins 0.1,0.9,0.2,0.8 \
               spacing 0.02,0.1
 unset key
-set title "{\symbol a}"
-plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#55ff0000" ,\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#5500ff00",\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.5 lc rgb "#550000ff",\
+set title "$\\alpha_{ON} < \\alpha_{OFF}$"
+plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#11ff0000" ,\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#1100ff00",\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")<column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.3 lc rgb "#110000ff",\
      NaN w p pt 6 ps 1 lc "red" title "Mult=128" , NaN w p pt 6 ps 1 lc "green" title "Mult=16" , NaN w p pt 6 ps 1 lc  "blue" title "Mult=2"
 
 
 
 unset ylabel
-unset ytics
+#unset ytics
 unset key
+set format y "";
 
-plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#55ff0000" ,\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#5500ff00",\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.5 lc rgb "#550000ff",\
+set title "$\\alpha_{ON} = \\alpha_{OFF}$"
+plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#11ff0000" ,\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#1100ff00",\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")==column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.3 lc rgb "#110000ff",\
      NaN w p pt 6 ps 1 lc "red" title "Mult=128" , NaN w p pt 6 ps 1 lc "green" title "Mult=16" , NaN w p pt 6 ps 1 lc  "blue" title "Mult=2"
 
-set key at 200,50
-set key box opaque fillcolor "0x7faaaaaa"
+set key at 195,250
+set key box opaque fillcolor "0x33ffffff"
 set key samplen 2 spacing 2 font ",10"
 
 
-plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#55ff0000" ,\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.5 lc rgb "#5500ff00",\
-     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.5 lc rgb "#550000ff",\
+set title "$\\alpha_{ON} > \\alpha_{OFF}$"
+plot filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 128 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#11ff0000" ,\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 16 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0) w p pt 6 ps 0.3 lc rgb "#1100ff00",\
+     filename using "PARETO-NodeCount":( (column("GEWI-Mult") == 2 && column("PARETO-Shape_on")>column("PARETO-Shape_off") ) ? column("LINK-MWT")-column("GEWI-MWT") : 1/0)  w p pt 6 ps 0.3 lc rgb "#110000ff",\
      NaN w p pt 6 ps 1 lc "red" title "Mult=128" , NaN w p pt 6 ps 1 lc "green" title "Mult=16" , NaN w p pt 6 ps 1 lc  "blue" title "Mult=2"
 
 unset multiplot
