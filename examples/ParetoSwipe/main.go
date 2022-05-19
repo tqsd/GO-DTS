@@ -45,7 +45,7 @@ type parameters struct {
 func generateSetups() []parameters {
 
 	//shape parameter choosing
-	res := int(5)
+	res := int(10)
 	on_shapes := make([]float64, res-1)
 	off_shapes := make([]float64, res-1)
 	for i := 0; i < res-1; i++ {
@@ -56,7 +56,7 @@ func generateSetups() []parameters {
 
 	// Cluster Size
 	nodeCounts := make([]int, 0)
-	for i := 2; i < 60; i += 2 {
+	for i := 2; i < 400; i += 2 {
 		nodeCounts = append(nodeCounts, i)
 	}
 
@@ -90,11 +90,11 @@ func generateSetups() []parameters {
 						cost:       cost,
 						gewi_rate:  float64(c) / 2,
 						mult:       m,
-						E:          2 * float64(c) * m * cost,
+						E:          1 * float64(c) * m * cost,
 						e:          0,
-						gewi_B:     2 * float64(c) * m,
+						gewi_B:     1 * float64(c) * m,
 						link_rate:  float64(c) / 2,
-						link_B:     float64(2) * float64(c) * m,
+						link_B:     float64(1) * float64(c) * m,
 					})
 				}
 			}
@@ -124,9 +124,9 @@ func simulate(fileName string, setup parameters) {
 }
 
 // Set appropriate constants for your setup
-const LENGTH_OF_TIMESERIES = 10000
-const REPEAT_RUNS = 1
-const MAX_NUM_OF_GO_ROUTINES = 1
+const LENGTH_OF_TIMESERIES = 100000
+const REPEAT_RUNS = 5
+const MAX_NUM_OF_GO_ROUTINES = 100
 
 func main() {
 
